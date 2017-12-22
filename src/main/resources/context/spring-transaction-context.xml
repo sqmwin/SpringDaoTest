@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!--引入jdbc配置文件-->
+    <context:property-placeholder location="jdbc.properties"/>
+    <!--配置数据源-c3p0-->
+    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource" id="comboPooledDataSource">
+        <property name="driverClass" value="${mysql.driver}"/>
+        <property name="jdbcUrl" value="${test.url}"/>
+        <property name="user" value="${mysql.username}"/>
+        <property name="password" value="${mysql.password}"/>
+    </bean>
+
+    <!--配置dao-->
+    <bean class="com.sqm.transaction.dao.impl.AccountDaoImpl" id="accountDao">
+        <property name="dataSource" ref="comboPooledDataSource"/>
+    </bean>
+    <bean class="com.sqm.transaction.dao.impl.StockDaoImpl" id="stockDao">
+        <property name="dataSource" ref="comboPooledDataSource"/>
+    </bean>
+
+    <!--配置service-->
+    <bean class="com.sqm.transaction.service.impl.StockProcessServiceImpl" id="stockProcessService"
+          p:accountDao-ref="accountDao" p:stockDao-ref="stockDao"/>
+</beans>
