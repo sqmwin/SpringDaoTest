@@ -13,6 +13,7 @@ import java.sql.SQLException;
  * @version 1.0
  */
 public class AccountRowMapper implements RowMapper<Account> {
+    @Override
     public Account mapRow(ResultSet resultSet, int i) throws SQLException {
         Account account = new Account();
         account.setAid(resultSet.getInt("aid"));

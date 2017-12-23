@@ -29,4 +29,42 @@
     <!--配置service-->
     <bean class="com.sqm.transaction.service.impl.StockProcessServiceImpl" id="stockProcessService"
           p:accountDao-ref="accountDao" p:stockDao-ref="stockDao"/>
+
+    <!--配置事务管理器-->
+    <bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="transactionManager">
+        <property name="dataSource" ref="comboPooledDataSource"/>
+    </bean>
+
+    <!--配置事务代理bean,由事务代理工厂创建-->
+    <!--<bean class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"-->
+          <!--id="stockProcessServiceProxy">-->
+        <!--<property name="transactionManager" ref="transactionManager"/>-->
+        <!--<property name="target" ref="stockProcessService"/>-->
+        <!--<property name="transactionAttributes">-->
+            <!--<props>-->
+                <!--<prop key="open*">PROPAGATION_REQUIRED</prop>-->
+                <!--<prop key="find*">PROPAGATION_SUPPORTS,readOnly</prop>-->
+                <!--<prop key="buyStock">PROPAGATION_REQUIRED,-StockException</prop>-->
+            <!--</props>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <!--配置事务注解驱动-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!--配置事务通知-->
+    <tx:advice transaction-manager="transactionManager" id="transactionInterceptor">
+        <tx:attributes>
+            <tx:method name="open*" isolation="SERIALIZABLE"/>
+            <tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
+            <tx:method name="buyStock" rollback-for="StockException" isolation="SERIALIZABLE"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--配置事务顾问-->
+    <aop:config>
+        <aop:pointcut id="pointcut" expression="execution(* com.sqm.transaction.service.impl.*.*(..))"/>
+        <aop:advisor advice-ref="transactionInterceptor" pointcut-ref="pointcut"/>
+    </aop:config>
+
 </beans>

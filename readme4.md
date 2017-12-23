@@ -268,7 +268,7 @@
                 <property name="user" value="root"/>
                 <property name="password" value="admin"/>
             </bean>
-        ```
+      ```
 
 
 ### 4.1.4 从属性文件读取数据库连接信息
@@ -295,7 +295,7 @@
             -   ```xml
                     <!--注册属性文件bean方式,不常用-->
                     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-                ```
+              ```
 
         2.  \<context:property-placeholder/>方式
 
@@ -307,7 +307,7 @@
                     <!--注册属性文件方式二,context:property-placeholder-->
                     <context:property-placeholder location="jdbc.properties"/>
                     <bean class="com.sqm.springdao.service.impl.UserServiceImpl" id="userServiceTarget"/>
-                ```
+              ```
 
 ### 4.1.5 配置JDBC模板
 
@@ -320,7 +320,7 @@
             <bean class="org.springframework.jdbc.core.JdbcTemplate">
                 <property name="dataSource" ref="comboPooledDataSource"/>
             </bean>
-        ```
+      ```
 
 ### 4.1.6 Dao实现类继承JdbcDaoSupport类
 
@@ -335,7 +335,7 @@
             <bean class="com.sqm.springdao.dao.impl.UserDaoImpl" id="userServiceTarget">
                 <property name="jdbcTemplate" ref="jdbcTemplate"/>
             </bean>
-        ```
+      ```
 
 -   仔细查看 JdbcDaoSupport 类，发现其有一个 dataSource 属性，查看 setDataSource()方法体可知，若 JDBC 模板为null，则会**自动创建一个模板对象**
 
@@ -424,7 +424,7 @@
                 List<String> usernames = getJdbcTemplate().queryForList(select, String.class, age);
                 return usernames;
             }
-        ```
+      ```
 
 2.  自定义对象查询
 
@@ -481,7 +481,7 @@
                     List<User> users = getJdbcTemplate().query(select, new UserRowMapper());
                     return users;
                 }
-            ```
+          ```
 
 ### 4.1.9 注意:Jdbc模板是多例的
 
@@ -549,13 +549,18 @@
     -   定义了描述事务的三类常量:**事务隔离级别**,**事务传播行为**,事务默认**超时**时限,以及对他们的操作
 
     1.  定义了五个事务隔离级别常量
-        -   以ISOLATION_开头,ISOLATION_XXX
+        -   以**ISOLATION_**开头,ISOLATION_XXX
         -   **DEFAULT**:db默认的事务隔离级别;Mysql为REPEATABLE_READ;Oracle为READ_COMMITTED
         -   READ_UNCOMMITTED:读未提交,**不解决**并发问题
         -   READ_COMMITTED:读已提交,解决**脏读**,存在不可重复读和幻读
         -   REPEATABLE_READ:可重复读,解决**脏读,不可重复读**,存在幻读
         -   SERIALIZABLE:**串行**,即非并行不存在并发问题
-    2.  定义了七个事务传播行为常量
+
+    2.  定义了七个**事务传播**行为常量
+
+        -   以PROPAGATION_开头,PROPAGATION\_XXX
+
+
         -   事务传播行为:处于不同事务的方法相互调用时,执行期间的**事务维护情况**
             -   如:A事务中的方法doSome()调用B事务中的方法doOther(),在调用执行期间事务的维护情况,就称为事务传播行为,事务传播行为是**加在方法上**的
         -   **REQUIRED**：指定的**方法**必须在**事务内执行**
@@ -567,6 +572,7 @@
         -   NOT_SUPPORTED：指定的方法**不能在事务环境中执行**，若当前**存在事务**，就将当前**事务挂起**
         -   NEVER：指定的方法**不能在事务环境下执行**，若当前**存在事务**，就直接**抛出异常**
         -   NESTED：指定的方法**必须在事务内执行**。若当前**存在事务**，则在**嵌套事务内执行**；若当前**没有事务**，则创建一个**新事务**
+
     3.  定义了默认事务超时时限
         -   常量 **TIMEOUT_DEFAULT** 定义了事务底层默认的超时时限，及**不支持事务超时时限设置**的**none** 值
         -   注意，事务的超时时限起作用的条件比较多，且超时的时间计算点较复杂。所以，该值一般就**使用默认值**即可
@@ -801,56 +807,213 @@
 
 10.  定义测试类
 
-     -    view 层测试类 MyTest。现在就可以在无事务代理的情况下运行了
+    -    view 层测试类 MyTest。现在就可以在无事务代理的情况下运行了
 
-     ```java
-     public class TransactionTest {
-         private ApplicationContext context;
-         private StockProcessService service;
+    ```java
+    public class TransactionTest {
+        private ApplicationContext context;
+        private StockProcessService service;
 
-         @Before
-         public void setUp() {
-             context = new ClassPathXmlApplicationContext("context/spring-transaction-context.xml");
-             service = (StockProcessService) context.getBean("stockProcessService");
-         }
+        @Before
+        public void setUp() {
+            context = new ClassPathXmlApplicationContext("context/spring-transaction-context.xml");
+            service = (StockProcessService) context.getBean("stockProcessService");
+        }
 
-         //开账户与股票账户
-         @Test
-         public void init() {
-             service.openAccount("sqm", 10000);
-             service.openStock("sqmStock", 100);
-         }
+        //开账户与股票账户
+        @Test
+        public void init() {
+            service.openAccount("sqm", 10000);
+            service.openStock("sqmStock", 100);
+        }
 
-         //买股票,500元买100股
-         @Test
-         public void buyStock() throws StockException {
-             service.buyStock("sqm", "sqmStock", 500, 100);
-         }
-     }
-     ```
+        //买股票,500元买100股
+        @Test
+        public void buyStock() throws StockException {
+            service.buyStock("sqm", "sqmStock", 500, 100);
+        }
+    }
+    ```
 
 ### 4.2.3 使用Spring的事务代理工厂管理事务
 
-1.  复制项目
-2.  导入jar包
+-   Service的实现类在之前是以非事务方式执行的;需要使用事务代理来管理事务,让ServiceImpl在事务环境下运行
+-   事务代理使用的类为:**TransactionProxyFactoryBean**
+    -   事务代理工厂bean,用于创建事务代理bean
+    -   全类名:
+    -   该bean需要初始化下列三个属性
+        -   **transactionManager**:事务管理器
+        -   **target**:目标对象,要使用事务代理的对象
+        -   **transactionAttributes**:事务属性
+-   在用xml配置事务代理时,受查异常的回滚由程序员设置
+    -   **"-异常"**:使发生指定异常的事务进行**回滚**
+    -   **"+异常"**:使发生指定异常的事务进行**提交**
+
+1.  复制项目:上一个项目继续使用
+
+2.  导入jar包:使用aop,导入aop-alliance与spring-aop两个jar包
+
 3.  在容器中添加事务管理器 DataSourceTransactionManager
+
+    -   未使用Hibernate事务管理器
+
+    -   ```xml
+            <!--配置事务管理器-->
+            <bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="transactionManager">
+                <property name="dataSource" ref="comboPooledDataSource"/>
+            </bean>
+        ```
+
 4.  在容器中添加事务代理 TransactionProxyFactoryBean
+
+    -   prop中的key指定要用事务的方法,prop的值为事务定义的属性
+    -   -StockException:发生StockException时,回滚事务
+    -   readOnly:对数据库的操作为只读
+
+
+    -   ```xml
+            <!--配置事务代理bean,由事务代理工厂创建-->
+            <bean class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+                  id="stockProcessServiceProxy">
+                <property name="transactionManager" ref="transactionManager"/>
+                <property name="target" ref="stockProcessService"/>
+                <property name="transactionAttributes">
+                    <props>
+                        <prop key="open*">PROPAGATION_REQUIRED</prop>
+                        <prop key="find*">PROPAGATION_SUPPORTS,readOnly</prop>
+                        <prop key="buyStock">PROPAGATION_REQUIRED,-StockException</prop>
+                    </props>
+                </property>
+            </bean>
+        ```
+
 5.  修改测试类
+
+    -   通过事务代理运行
+
+    -   ```java
+                service = (StockProcessService) context.getBean("stockProcessServiceProxy");
+        ```
 
 ### 4.2.4 使用Spring的事务注解管理事务
 
-1.  复制项目
-2.  在容器中添加事务管理器
-3.  在 Service实现类方法上添加注解
-4.  修改配置文件内容
-5.  修改测试类
+-   通过**@Transactional**注解方式将事务织入到要用事务的方法
+
+-   使用注解方式需在配置文件中加入**\<tx:annotation-driven>标签**,事务注解驱动,指定**transaction-manager属性**指定要用的事务管理器
+
+-   ```xml
+        <!--配置事务注解驱动-->
+        <tx:annotation-driven transaction-manager="transactionManager"/>
+    ```
+
+-   @Transaction的所有可选属性如下:
+
+    -   **propagation**:事务传播属性:属性类型为**Propagation枚举**,默认值为:Propagation.REQUIRED
+    -   **isolation**:事物的隔离级别:属性类型为**Isolation枚举**,默认值为:Isolation.DEFAULT
+    -   **readOnly**:s该方法对数据库操作是否可读,属性类型为boolean,默认为false
+    -   **timeout**:该方法与数据库连接时的超时时限,单位为秒,类型为int,默认值为-1,无时限
+    -   **rollbackFor**:指定需要回滚的异常类:属性类型为Class[],默认为空数组,当只有一个异常类时不使用数组
+    -   **rollbackForCalssName**:指定需要回滚的异常类名:类型为String[],其余同上
+    -   **noRollbackFor**:指定不需要回滚的异常类:类型为Class[]
+    -   **noRollbackForClassName**:同上,类型为String][]
+
+-   @Transaction用在**方法**上的话,只能用在**public方法**上
+
+-   @Transaction用在**类**上,指定类中的**所有方法**都织入事务
+
+-   测试@Transaction注解事务
+
+    1.  复制项目:使用之前的项目
+
+    2.  在容器中添加事务管理器:使用之前的事务管理器;配置事务注解驱动
+
+        ```xml
+            <!--配置事务注解驱动-->
+            <tx:annotation-driven transaction-manager="transactionManager"/>
+        ```
+
+    3.  在 Service实现类方法上添加注解
+
+        ```java
+            @Override
+            @Transactional(propagation = Propagation.REQUIRED,isolation = Isolation.SERIALIZABLE,rollbackFor = SocketException.class)
+            public void buyStock(String aname, String sname, double money, int amount) throws StockException {
+                accountDao.updateAccount(aname, money);
+                if (1 == 1) {
+                    throw new StockException();
+                }
+                stockDao.updateStock(sname,amount);
+            }
+        	@Override
+            @Transactional(propagation = Propagation.SUPPORTS,readOnly = true)
+            public Account findAccount(String aname) {
+                return accountDao.selectAccount(aname);
+            }
+        ```
+
+    4.  修改测试类
+
+        ```java
+                service = (StockProcessService) context.getBean("stockProcessService");
+        ```
 
 ### 4.2.5 使用 AspectJ的AOP 配置管理事务（重点)
 
-1.  复制项目
-2.  导入jar包
-3.  在容器中添加事务管理器
-4.  配置事务通知
-5.  配置顾问
-6.  修改测试类
+-   使用Spring配置文件配置事务的不足是,要针对每个目标类或每个目标方法都要配置事务代理,目标类较多时配置文件会比较臃肿
 
+-   使用xml配置顾问方式可以自动为每个**符合切入点表达式**的类生成事务代理
+
+-   测试使用AspectJ的AOP配置管理事务:
+
+    1.  复制项目:使用之前的项目
+
+    2.  导入jar包:aspectj的包(weaver,tools(可选),aspectjrt(可选)与spring与aspectj的整合包
+
+    3.  在容器中添加事务管理器:使用之前的JDBC数据源事务管理器
+
+    4.  配置事务通知
+
+        -   \<tx:advice/>标签:事务通知:
+
+
+        -   为事务通知设置相关属性:指定要将事务**以什么方式**织入给**哪些方法**
+
+        -   \<tx:method>标签为使用事物的方法的定义,name值为方法名
+
+        -   rollback-for的值为异常的类名,un-rollback-for相同
+
+        -   ```xml
+                <!--配置事务通知-->
+                <tx:advice transaction-manager="transactionManager" id="transactionInterceptor">
+                    <tx:attributes>
+                        <tx:method name="open*" propagation="REQUIRED" isolation="SERIALIZABLE"/>
+                        <tx:method name="find*" propagation="SUPPORTS" read-only="true" isolation="READ_COMMITTED"/>
+                        <tx:method name="buyStock" propagation="REQUIRED" rollback-for="StockException" isolation="SERIALIZABLE"/>
+                    </tx:attributes>
+                </tx:advice>
+            ```
+
+    5.  配置AOP顾问
+
+        -   将tx:advice中的事务通知指定给织入点pointcut,织入点由execution表达式表示
+
+        -   切入点表达式一定要指定切入点在要使用事务通知的包(server层),否则会把dao层也当做切入点二循环调用,出现异常
+
+        -   ```xml
+                <!--配置事务通知-->
+                <tx:advice transaction-manager="transactionManager" id="transactionInterceptor">
+                    <tx:attributes>
+                        <tx:method name="open*" isolation="SERIALIZABLE"/>
+                        <tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
+                        <tx:method name="buyStock" rollback-for="StockException" isolation="SERIALIZABLE"/>
+                    </tx:attributes>
+                </tx:advice>
+
+                <!--配置事务顾问-->
+                <aop:config>
+                    <aop:pointcut id="pointcut" expression="execution(* com.sqm.transaction.service.impl.*.*(..))"/>
+                    <aop:advisor advice-ref="transactionInterceptor" pointcut-ref="pointcut"/>
+                </aop:config>
+            ```
+
+    6.  修改测试类:测试类的bean仍然为目标类而不是代理类

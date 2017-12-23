@@ -14,6 +14,7 @@ import java.sql.SQLException;
  * @version 1.0
  */
 public class StockRowMapper implements RowMapper<Stock> {
+    @Override
     public Stock mapRow(ResultSet resultSet, int i) throws SQLException {
         Stock stock = new Stock();
         stock.setSid(resultSet.getInt("sid"));
